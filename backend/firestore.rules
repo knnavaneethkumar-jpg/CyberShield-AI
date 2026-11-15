@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email in ['knnavaneethkumar@gmail.com', 'madangowda@cybershield.ai'] ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // 1. User Profiles
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.size() <= 6
+          && data.uid == request.auth.uid
+          && data.email is string && data.email.size() <= 256
+          && (data.get('displayName', '') is string && data.get('displayName', '').size() <= 128)
+          && (data.get('photoURL', '') is string && data.get('photoURL', '').size() <= 512)
+          && data.createdAt == request.time;
+      }
+
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) 
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL'])
+        && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 128
+        && request.resource.data.photoURL is string && request.resource.data.photoURL.size() <= 512;
+      
+      // 2. Scans (Subcollection)
+      match /scans/{scanId} {
+        function isValidScan(data) {
+          return data.size() <= 12
+            && data.userId == request.auth.uid
+            && data.type in ['app', 'message', 'link']
+            && data.riskScore is number && data.riskScore >= 0 && data.riskScore <= 100
+            && data.classification in ['Safe', 'Suspicious', 'Dangerous']
+            && data.explanation is string && data.explanation.size() <= 2000
+            && data.timestamp == request.time;
+        }
+
+        allow list: if isOwner(userId) || isAdmin();
+        allow get: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidScan(request.resource.data) && isValidId(scanId);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      // 3. User Settings (Subcollection)
+      match /settings/{settingId} {
+        function isValidSettings(data) {
+          return data.size() <= 12
+            && data.userId == request.auth.uid
+            && data.sensitivity in ['high', 'balanced', 'low']
+            && data.deepAnalysis is bool
+            && data.autoScanLinks is bool
+            && data.soundAlerts is bool
+            && data.criticalWarningBanner is bool
+            && data.dataRetentionDays is number && data.dataRetentionDays >= 0 && data.dataRetentionDays <= 365
+            && data.anonymizeInputs is bool
+            && data.hudAnimations is bool
+            && data.language is string && data.language.size() <= 10
+            && data.updatedAt == request.time;
+        }
+
+        allow get: if isOwner(userId) || isAdmin();
+        allow create, update: if isOwner(userId) && isValidSettings(request.resource.data) && isValidId(settingId);
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // 4. Appointed Admins
+    match /admins/{adminId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // 5. Threat Blacklist & IOCs
+    match /blacklist/{indicatorId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

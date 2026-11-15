@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Scan": {
+      "title": "Scan Result",
+      "description": "Security scan history",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["app", "message", "link"] },
+        "input": { "type": "string" },
+        "riskScore": { "type": "number" },
+        "classification": { "type": "string", "enum": ["Safe", "Suspicious", "Dangerous"] },
+        "explanation": { "type": "string" },
+        "whyFlagged": { "type": "array", "items": { "type": "string" } },
+        "riskFactors": { "type": "array", "items": { "type": "string" } },
+        "recommendedActions": { "type": "array", "items": { "type": "string" } },
+        "detailedLog": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "riskScore", "classification", "timestamp"]
+    },
+    "UserSettings": {
+      "title": "User Security Settings",
+      "description": "Security preferences, alert options, scanner sensitivity, and privacy configurations",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "sensitivity": { "type": "string", "enum": ["high", "balanced", "low"] },
+        "deepAnalysis": { "type": "boolean" },
+        "autoScanLinks": { "type": "boolean" },
+        "soundAlerts": { "type": "boolean" },
+        "criticalWarningBanner": { "type": "boolean" },
+        "dataRetentionDays": { "type": "number" },
+        "anonymizeInputs": { "type": "boolean" },
+        "hudAnimations": { "type": "boolean" },
+        "language": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "sensitivity", "language"]
+    },
+    "Admin": {
+      "title": "Administrator Profile",
+      "description": "Authorized administrator or secops officer",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["super_admin", "secops_admin"] },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "ThreatBlacklist": {
+      "title": "Threat Blacklist Entry",
+      "description": "Global blocked indicator of compromise (domain, hash, or sender ID)",
+      "type": "object",
+      "properties": {
+        "indicator": { "type": "string" },
+        "type": { "type": "string", "enum": ["domain", "sender_id", "hash", "apk"] },
+        "threatCategory": { "type": "string" },
+        "addedBy": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["indicator", "type", "threatCategory"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/users/{userId}/scans/{scanId}": {
+      "schema": "Scan",
+      "description": "Historical scans for a specific user"
+    },
+    "/users/{userId}/settings/{settingId}": {
+      "schema": "UserSettings",
+      "description": "User security preferences and settings"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Appointed system administrators"
+    },
+    "/blacklist/{indicatorId}": {
+      "schema": "ThreatBlacklist",
+      "description": "Global blocked threat indicators"
+    }
+  }
+}

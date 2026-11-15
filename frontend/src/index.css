@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #020617;
+  --color-primary-light: #0B1F3A;
+  --color-secondary: #F5F1E8;
+  --color-accent-teal: #00D1C1;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-red: #FF4D4D;
+  --color-accent-green: #2ECC71;
+  --color-accent-yellow: #F4C542;
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    @apply overflow-x-hidden;
+    max-width: 100vw;
+    width: 100%;
+  }
+
+  body {
+    @apply font-sans antialiased min-h-screen relative overflow-x-hidden;
+    max-width: 100vw;
+    width: 100%;
+    transition: background-color 0.4s ease, color 0.3s ease;
+  }
+
+  /* Default Dark Mode background overlays (active only when theme-dark) */
+  html.theme-dark body {
+    @apply bg-primary text-white;
+  }
+
+  html.theme-dark body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2070');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    opacity: 0.25;
+    z-index: -1;
+    filter: saturate(0.6) brightness(0.7);
+  }
+
+  html.theme-dark body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(2, 6, 23, 0.7) 0%, rgba(2, 6, 23, 0.9) 100%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Light Mode styles for high legibility, clean modern look, and great contrast */
+  html.theme-light body {
+    background-color: transparent;
+    color: #0f172a;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply backdrop-blur-xl rounded-2xl transition-all duration-300;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  html.theme-light .glass-card {
+    background-color: rgba(255, 255, 255, 0.82) !important;
+    border-color: rgba(15, 23, 42, 0.09) !important;
+    box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.07), 0 4px 6px -2px rgba(15, 23, 42, 0.04) !important;
+    color: #0f172a !important;
+  }
+  
+  .cyber-gradient {
+    @apply bg-gradient-to-br from-accent-teal to-accent-purple;
+  }
+  
+  .glow-teal {
+    @apply shadow-[0_0_20px_rgba(0,209,193,0.3)];
+  }
+  
+  .glow-teal-hover:hover {
+    @apply shadow-[0_0_30px_rgba(0,209,193,0.5)];
+  }
+
+  html.theme-light .glow-teal {
+    box-shadow: 0 4px 20px rgba(13, 148, 136, 0.25) !important;
+  }
+
+  html.theme-light .glow-teal-hover:hover {
+    box-shadow: 0 6px 25px rgba(13, 148, 136, 0.35) !important;
+  }
+}
+
+/* Light Mode Overrides for text legibility and clean cards */
+html.theme-light {
+  color-scheme: light;
+}
+
+html.theme-light .bg-primary {
+  background-color: transparent !important;
+}
+
+html.theme-light .text-white {
+  color: #0f172a !important;
+}
+
+html.theme-light .text-white\/90,
+html.theme-light .text-white\/80 {
+  color: #1e293b !important;
+}
+
+html.theme-light .text-white\/70,
+html.theme-light .text-white\/60 {
+  color: #334155 !important;
+}
+
+html.theme-light .text-white\/50,
+html.theme-light .text-white\/40 {
+  color: #475569 !important;
+}
+
+html.theme-light .text-white\/30 {
+  color: #64748b !important;
+}
+
+html.theme-light .border-white\/5,
+html.theme-light .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.09) !important;
+}
+
+html.theme-light .border-white\/20 {
+  border-color: rgba(15, 23, 42, 0.16) !important;
+}
+
+html.theme-light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.035) !important;
+}
+
+html.theme-light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.065) !important;
+}
+
+html.theme-light .bg-white\/20 {
+  background-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+html.theme-light nav {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+html.theme-light footer {
+  background-color: rgba(255, 255, 255, 0.65) !important;
+  border-top-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+html.theme-light .bg-black\/20,
+html.theme-light .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.theme-light input,
+html.theme-light textarea,
+html.theme-light select {
+  color: #0f172a !important;
+}
+
+html.theme-light input::placeholder,
+html.theme-light textarea::placeholder {
+  color: #64748b !important;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 209, 193, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(0, 209, 193, 0.6); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
